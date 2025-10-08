@@ -1,5 +1,8 @@
 <template>
-  <div v-if="hasError" class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+  <div
+    v-if="hasError"
+    class="min-h-screen flex items-center justify-center bg-gray-50 px-4"
+  >
     <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
       <div class="mb-6">
         <svg
@@ -18,7 +21,9 @@
         </svg>
       </div>
 
-      <h2 class="text-2xl font-bold text-gray-900 mb-4">Something went wrong</h2>
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">
+        Something went wrong
+      </h2>
 
       <p class="text-gray-600 mb-8 leading-relaxed">
         We're sorry, but something unexpected happened. Our team has been
@@ -27,23 +32,32 @@
 
       <div class="flex flex-col sm:flex-row gap-4 justify-center mb-6">
         <button
-          @click="handleRetry"
           class="px-6 py-3 rounded-lg font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center"
           :disabled="isRetrying"
+          @click="handleRetry"
         >
           <span
             v-if="isRetrying"
             class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"
             aria-hidden="true"
-          ></span>
+          />
           {{ isRetrying ? 'Retrying...' : 'Try Again' }}
         </button>
 
-        <button @click="handleReload" class="px-6 py-3 rounded-lg font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500">Reload Page</button>
+        <button
+          class="px-6 py-3 rounded-lg font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500"
+          @click="handleReload"
+        >
+          Reload Page
+        </button>
       </div>
 
       <details v-if="showDetails" class="text-left mb-4">
-        <summary class="cursor-pointer text-sm text-gray-600 hover:text-gray-800 font-medium">Technical Details</summary>
+        <summary
+          class="cursor-pointer text-sm text-gray-600 hover:text-gray-800 font-medium"
+        >
+          Technical Details
+        </summary>
         <div class="mt-4 p-4 bg-gray-50 rounded-lg text-sm">
           <p class="mb-2">
             <strong>Error:</strong>
@@ -58,13 +72,24 @@
             {{ errorTime }}
           </p>
           <details v-if="error?.stack" class="mt-4">
-            <summary class="cursor-pointer text-sm text-gray-600 hover:text-gray-800 font-medium">Stack Trace</summary>
-            <pre class="text-xs text-gray-500 bg-gray-100 p-2 rounded overflow-x-auto mt-2">{{ error.stack }}</pre>
+            <summary
+              class="cursor-pointer text-sm text-gray-600 hover:text-gray-800 font-medium"
+            >
+              Stack Trace
+            </summary>
+            <pre
+              class="text-xs text-gray-500 bg-gray-100 p-2 rounded overflow-x-auto mt-2"
+            >
+              {{ error.stack }}
+            </pre>
           </details>
         </div>
       </details>
 
-      <button @click="toggleDetails" class="text-sm text-gray-500 hover:text-gray-700 underline">
+      <button
+        class="text-sm text-gray-500 hover:text-gray-700 underline"
+        @click="toggleDetails"
+      >
         {{ showDetails ? 'Hide' : 'Show' }} Technical Details
       </button>
     </div>
@@ -89,6 +114,7 @@ interface ErrorInfo {
 
 const props = withDefaults(defineProps<Props>(), {
   fallback: true,
+  onError: () => {},
 });
 
 const emit = defineEmits<{
@@ -106,12 +132,12 @@ onErrorCaptured((err: Error, instance, info: string) => {
   logger.error('Error boundary caught error', {
     error: err.message,
     componentStack: info,
-    componentName: instance?.$options.name || 'Unknown',
+    componentName: instance?.$options.name ?? 'Unknown',
   });
 
   error.value = err;
   errorInfo.value = {
-    componentName: instance?.$options.name || 'Unknown',
+    componentName: instance?.$options.name ?? 'Unknown',
     componentStack: info,
   };
   errorTime.value = new Date().toISOString();
@@ -134,7 +160,7 @@ const handleRetry = async () => {
 
   try {
     // Store component name before clearing errorInfo
-    const componentName = errorInfo.value?.componentName || 'Unknown';
+    const componentName = errorInfo.value?.componentName ?? 'Unknown';
 
     // Wait a moment before retrying
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -155,7 +181,7 @@ const handleRetry = async () => {
 };
 
 const handleReload = () => {
-  const componentName = errorInfo.value?.componentName || 'Unknown';
+  const componentName = errorInfo.value?.componentName ?? 'Unknown';
 
   logger.info('Error boundary reload triggered', {
     componentName,
@@ -195,4 +221,3 @@ onMounted(() => {
   };
 });
 </script>
-

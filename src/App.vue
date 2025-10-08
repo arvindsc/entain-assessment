@@ -96,7 +96,7 @@ const cleanupAutoRefresh = (): void => {
 // Handle global errors from error boundary
 const handleGlobalError = (
   error: Error,
-  errorInfo: { componentName?: string; componentStack?: string }
+  errorInfo: { componentName?: string; componentStack?: string },
 ): void => {
   logger.error(
     'Global error caught by error boundary',
@@ -104,7 +104,7 @@ const handleGlobalError = (
       componentName: errorInfo.componentName,
       componentStack: errorInfo.componentStack,
     },
-    error
+    error,
   );
 
   // In a real application, you would send this to an error reporting service

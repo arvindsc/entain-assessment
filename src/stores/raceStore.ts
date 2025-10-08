@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { raceApi } from '../services/raceApi';
-import type { Race, Category, Config, RaceStore } from '../types';
+import type { Race, Category, RaceStore } from '../types';
 import { logger } from '../utils/logger';
 import { validator } from '../utils/validator';
+import { CONFIG } from '../config';
 
 /**
  * Race categories with their display properties
@@ -31,17 +32,6 @@ const RACE_CATEGORIES: readonly Category[] = [
 ] as const;
 
 /**
- * Configuration constants
- * @constant {Config}
- */
-const CONFIG: Config = {
-  MAX_RACES_DISPLAYED: 5,
-  AUTO_REFRESH_INTERVAL: 30000, // 30 seconds
-  TIME_FILTER_HOURS: 24, // Show races within next 24 hours
-  RACE_REMOVAL_BUFFER: 60000, // Remove races 1 minute after start
-} as const;
-
-/**
  * Race Store - Manages race data, filtering, and state
  * Uses Pinia for reactive state management with Vue 3 Composition API
  */
@@ -55,7 +45,7 @@ export const useRaceStore = defineStore('race', (): RaceStore => {
 
   // Getters
   const categories = computed<readonly Category[]>(() => RACE_CATEGORIES);
-  const config = computed<Config>(() => CONFIG);
+  const config = computed<typeof CONFIG>(() => CONFIG);
 
   /**
    * Get races filtered by selected categories
@@ -66,7 +56,7 @@ export const useRaceStore = defineStore('race', (): RaceStore => {
       return races.value;
     }
     return races.value.filter(race =>
-      selectedCategories.value.has(race.category_id)
+      selectedCategories.value.has(race.category_id),
     );
   });
 
@@ -77,7 +67,7 @@ export const useRaceStore = defineStore('race', (): RaceStore => {
   const sortedRaces = computed<readonly Race[]>(() => {
     return [...filteredRaces.value]
       .sort(
-        (a, b) => a.advertised_start.getTime() - b.advertised_start.getTime()
+        (a, b) => a.advertised_start.getTime() - b.advertised_start.getTime(),
       )
       .slice(0, CONFIG.MAX_RACES_DISPLAYED);
   });
@@ -87,8 +77,16 @@ export const useRaceStore = defineStore('race', (): RaceStore => {
    * @returns {readonly Race[]} Active race array
    */
   const activeRaces = computed<readonly Race[]>(() => {
-    // Temporarily return all races to fix the UI
-    return sortedRaces.value;
+    const result = sortedRaces.value;
+    logger.debug('Active races computed', {
+      sortedCount: sortedRaces.value.length,
+      filteredCount: filteredRaces.value.length,
+      totalRaces: races.value.length,
+      selectedCategories: Array.from(selectedCategories.value),
+      activeCount: result.length,
+      races: result,
+    });
+    return result;
   });
 
   /**
@@ -129,7 +127,7 @@ export const useRaceStore = defineStore('race', (): RaceStore => {
    */
   const fetchRaces = async (
     count: number = 10,
-    silent: boolean = false
+    silent: boolean = false,
   ): Promise<void> => {
     const startTime = performance.now();
 
@@ -162,21 +160,53 @@ export const useRaceStore = defineStore('race', (): RaceStore => {
 
       const data = await raceApi.getRaces(count);
 
+      logger.debug('Races fetched from API', {
+        count: data.length,
+        races: data,
+      });
+
+      logger.info('Raw API data received', {
+        count: data.length,
+        firstRace: data[0]
+          ? {
+              race_id: data[0].race_id,
+              advertised_start: data[0].advertised_start,
+              advertised_start_type: typeof data[0].advertised_start,
+              advertised_start_value:
+                data[0].advertised_start instanceof Date
+                  ? data[0].advertised_start.toISOString()
+                  : data[0].advertised_start,
+            }
+          : null,
+      });
+
       // Validate fetched data
       const validRaces: Race[] = [];
       const invalidRaces: string[] = [];
 
       for (const race of data) {
         const validation = validator.validateRaceData(race);
+
         if (validation.isValid) {
           validRaces.push(race);
         } else {
+          logger.warn('Race validation failed', {
+            race_id: race.race_id,
+            errors: validation.errors,
+            advertised_start: race.advertised_start,
+          });
           invalidRaces.push(`${race.race_id}: ${validation.errors.join(', ')}`);
         }
       }
 
       races.value = validRaces;
       lastFetchTime.value = new Date();
+
+      logger.info('Races stored', {
+        validCount: validRaces.length,
+        invalidCount: invalidRaces.length,
+        racesInStore: races.value.length,
+      });
 
       const duration = performance.now() - startTime;
 
@@ -206,7 +236,7 @@ export const useRaceStore = defineStore('race', (): RaceStore => {
           silent,
           duration: Math.round(duration),
         },
-        err as Error
+        err as Error,
       );
 
       if (!silent) {
@@ -214,7 +244,9 @@ export const useRaceStore = defineStore('race', (): RaceStore => {
           err instanceof Error ? err.message : 'Unknown error occurred';
       }
 
-      if (!silent) throw err;
+      if (!silent) {
+        throw err;
+      }
     } finally {
       if (!silent) {
         isLoading.value = false;

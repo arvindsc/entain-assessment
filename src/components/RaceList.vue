@@ -9,7 +9,7 @@
     >
       <div
         class="animate-spin rounded-full h-12 w-12 border-b-2 border-entain-primary mb-4"
-      ></div>
+      />
       <span class="text-lg text-gray-600">Loading races...</span>
       <span class="text-sm text-gray-500 mt-2">
         Please wait while we fetch the latest race data
@@ -42,12 +42,14 @@
         </div>
         <div class="ml-3 flex-1">
           <h3 class="text-sm font-medium text-red-800">Unable to load races</h3>
-          <p class="text-sm text-red-700 mt-1">{{ error }}</p>
+          <p class="text-sm text-red-700 mt-1">
+            {{ error }}
+          </p>
           <div class="mt-4">
             <button
-              @click="handleRetry"
               class="bg-red-100 text-red-800 px-4 py-2 rounded-md text-sm font-medium hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200"
               :disabled="isLoading"
+              @click="handleRetry"
             >
               Try Again
             </button>
@@ -75,7 +77,12 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else class="bg-white rounded-lg shadow-sm border border-gray-200 py-16 px-6" role="status" aria-live="polite">
+    <div
+      v-else
+      class="bg-white rounded-lg shadow-sm border border-gray-200 py-16 px-6"
+      role="status"
+      aria-live="polite"
+    >
       <div class="flex flex-col items-center justify-center text-center">
         <div class="w-16 h-16 text-gray-400 mb-4">
           <svg
@@ -92,14 +99,16 @@
             />
           </svg>
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">No races available</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">
+          No races available
+        </h3>
         <p class="text-sm text-gray-600 mb-6 max-w-md">
           {{ getEmptyStateMessage }}
         </p>
         <button
-          @click="handleRefresh"
           class="bg-entain-primary text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-entain-secondary focus:outline-none focus:ring-2 focus:ring-entain-primary focus:ring-offset-2 transition-colors duration-200"
           :disabled="isLoading"
+          @click="handleRefresh"
         >
           Refresh Data
         </button>
@@ -116,14 +125,14 @@
         <div
           class="animate-pulse-slow w-2 h-2 bg-entain-primary rounded-full mr-2"
           aria-hidden="true"
-        ></div>
+        />
         Auto-refreshing every {{ formatRefreshInterval }}
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRaceStore } from '../stores/raceStore';
@@ -138,13 +147,8 @@ import RaceCard from './RaceCard.vue';
 const raceStore = useRaceStore();
 
 // Destructure reactive state with storeToRefs to maintain reactivity
-const {
-  activeRaces,
-  isLoading,
-  error,
-  config,
-  selectedCategories,
-} = storeToRefs(raceStore);
+const { activeRaces, isLoading, error, config, selectedCategories } =
+  storeToRefs(raceStore);
 
 // Destructure actions directly (they don't need reactivity)
 const { fetchRaces, clearError } = raceStore;

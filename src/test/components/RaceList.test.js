@@ -59,7 +59,7 @@ describe('RaceList', () => {
       const loadingDiv = wrapper.find('[role="status"]');
       expect(loadingDiv.attributes('aria-live')).toBe('polite');
       expect(wrapper.text()).toContain(
-        'Please wait while we fetch the latest race data'
+        'Please wait while we fetch the latest race data',
       );
     });
   });
@@ -153,7 +153,7 @@ describe('RaceList', () => {
 
       expect(wrapper.find('[role="list"]').exists()).toBe(true);
       expect(
-        wrapper.find('[aria-label="List of upcoming races"]').exists()
+        wrapper.find('[aria-label="List of upcoming races"]').exists(),
       ).toBe(true);
     });
   });
@@ -167,12 +167,14 @@ describe('RaceList', () => {
     });
 
     it('shows appropriate message when categories are filtered', async () => {
-      mockStoreInstance.selectedCategories.value.add('9daef0d7-bf3c-4f50-921d-8e818c60fe61');
+      mockStoreInstance.selectedCategories.value.add(
+        '9daef0d7-bf3c-4f50-921d-8e818c60fe61',
+      );
 
       wrapper = mount(RaceList);
 
       expect(wrapper.text()).toContain(
-        'No races found for the selected categories'
+        'No races found for the selected categories',
       );
     });
 

@@ -33,10 +33,11 @@ module.exports = {
     'vue/multi-word-component-names': 'off',
     'vue/no-unused-vars': 'error',
     'vue/no-multiple-template-root': 'off',
-    'vue/require-default-prop': 'error',
+    'vue/require-default-prop': 'off', // Too strict for composition API
     'vue/require-prop-types': 'error',
     'vue/no-v-html': 'warn',
     'vue/valid-v-slot': 'error',
+    'vue/singleline-html-element-content-newline': 'off', // Too strict for simple elements
 
     // General JavaScript rules
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
@@ -77,7 +78,27 @@ module.exports = {
   },
   overrides: [
     {
+      files: ['*.js', '*.cjs', '*.mjs', 'vite.config.ts', 'vitest.config.ts'],
+      parserOptions: {
+        project: null,
+      },
+      rules: {
+        '@typescript-eslint/prefer-nullish-coalescing': 'off',
+        '@typescript-eslint/prefer-optional-chain': 'off',
+        '@typescript-eslint/no-floating-promises': 'off',
+        '@typescript-eslint/await-thenable': 'off',
+      },
+    },
+    {
       files: ['**/*.vue'],
+      parser: 'vue-eslint-parser',
+      parserOptions: {
+        parser: '@typescript-eslint/parser',
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        project: './tsconfig.json',
+        extraFileExtensions: ['.vue'],
+      },
       extends: [
         'plugin:vue/vue3-essential',
         'plugin:vue/vue3-strongly-recommended',
@@ -105,16 +126,59 @@ module.exports = {
         ],
         'vue/html-indent': ['error', 2],
         'vue/script-indent': ['error', 2],
+        'vue/singleline-html-element-content-newline': 'off',
       },
     },
     {
-      files: ['**/*.test.js', '**/*.spec.js'],
+      files: [
+        '**/*.test.js',
+        '**/*.test.ts',
+        '**/*.spec.js',
+        '**/*.spec.ts',
+        '**/test/**/*.ts',
+        '**/test/**/*.js',
+      ],
+      parserOptions: {
+        project: null,
+      },
       env: {
         jest: true,
-        vitest: true,
       },
       rules: {
         'no-console': 'off',
+        '@typescript-eslint/no-explicit-any': 'off', // Allow any types in test mocks
+        '@typescript-eslint/no-non-null-assertion': 'off', // Allow non-null assertions in tests
+        '@typescript-eslint/prefer-nullish-coalescing': 'off',
+        '@typescript-eslint/prefer-optional-chain': 'off',
+        '@typescript-eslint/no-floating-promises': 'off',
+        '@typescript-eslint/await-thenable': 'off',
+      },
+    },
+    {
+      files: ['**/utils/logger.ts'],
+      rules: {
+        'no-console': 'off', // Allow console statements in logger utility
+        '@typescript-eslint/no-explicit-any': 'off', // Allow any types in logger for flexibility
+      },
+    },
+    {
+      files: ['env.d.ts'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off', // Allow any types in Vue type declarations
+      },
+    },
+    {
+      files: ['**/*.example.ts'],
+      parserOptions: {
+        project: null,
+      },
+      rules: {
+        'no-console': 'off', // Allow console statements in examples
+        '@typescript-eslint/no-unused-vars': 'off', // Allow unused vars in examples
+        '@typescript-eslint/prefer-nullish-coalescing': 'off',
+        '@typescript-eslint/prefer-optional-chain': 'off',
+        '@typescript-eslint/no-floating-promises': 'off',
+        '@typescript-eslint/await-thenable': 'off',
       },
     },
   ],

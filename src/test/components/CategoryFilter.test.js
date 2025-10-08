@@ -83,7 +83,7 @@ describe('CategoryFilter', () => {
     await greyhoundButton.trigger('click');
 
     expect(toggleCategoryMock).toHaveBeenCalledWith(
-      '9daef0d7-bf3c-4f50-921d-8e818c60fe61'
+      '9daef0d7-bf3c-4f50-921d-8e818c60fe61',
     );
   });
 
@@ -127,11 +127,11 @@ describe('CategoryFilter', () => {
 
     expect(wrapper.find('[role="complementary"]').exists()).toBe(true);
     expect(wrapper.find('[aria-labelledby="filter-title"]').exists()).toBe(
-      true
+      true,
     );
     expect(wrapper.find('[role="group"]').exists()).toBe(true);
     expect(wrapper.find('[aria-label="Race category filters"]').exists()).toBe(
-      true
+      true,
     );
   });
 

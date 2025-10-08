@@ -46,13 +46,6 @@ export interface RaceSummary {
   readonly venue_country: string;
 }
 
-export interface Config {
-  readonly MAX_RACES_DISPLAYED: number;
-  readonly AUTO_REFRESH_INTERVAL: number;
-  readonly TIME_FILTER_HOURS: number;
-  readonly RACE_REMOVAL_BUFFER: number;
-}
-
 export interface RaceStore {
   readonly races: ComputedRef<readonly Race[]>;
   readonly categories: ComputedRef<readonly Category[]>;
@@ -60,7 +53,7 @@ export interface RaceStore {
   readonly isLoading: ComputedRef<boolean>;
   readonly error: ComputedRef<string | null>;
   readonly lastFetchTime: ComputedRef<Date | null>;
-  readonly config: ComputedRef<Config>;
+  readonly config: ComputedRef<typeof import('../config').CONFIG>;
   readonly filteredRaces: ComputedRef<readonly Race[]>;
   readonly sortedRaces: ComputedRef<readonly Race[]>;
   readonly activeRaces: ComputedRef<readonly Race[]>;

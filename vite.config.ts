@@ -69,7 +69,7 @@ export default defineConfig(({ mode }) => {
     define: {
       __APP_VERSION__: JSON.stringify(env.VITE_APP_VERSION || '1.0.0'),
       __BUILD_TIME__: JSON.stringify(
-        env.VITE_BUILD_TIME || new Date().toISOString()
+        env.VITE_BUILD_TIME || new Date().toISOString(),
       ),
     },
     // CSS configuration

@@ -130,12 +130,12 @@ class Validator {
     if (typeof sanitizedValue === 'string') {
       if (rules.minLength && sanitizedValue.length < rules.minLength) {
         errors.push(
-          `Value must be at least ${rules.minLength} characters long`
+          `Value must be at least ${rules.minLength} characters long`,
         );
       }
       if (rules.maxLength && sanitizedValue.length > rules.maxLength) {
         errors.push(
-          `Value must be no more than ${rules.maxLength} characters long`
+          `Value must be no more than ${rules.maxLength} characters long`,
         );
       }
     }
@@ -202,13 +202,21 @@ class Validator {
     }
 
     if (race['advertised_start']) {
-      const startValidation = this.validate(race['advertised_start'], {
-        type: 'date',
-      });
-      if (!startValidation.isValid) {
-        errors.push(
-          ...startValidation.errors.map(e => `advertised_start: ${e}`)
-        );
+      // Check if it's a valid Date object or can be converted to one
+      if (!(race['advertised_start'] instanceof Date)) {
+        const startValidation = this.validate(race['advertised_start'], {
+          type: 'date',
+        });
+        if (!startValidation.isValid) {
+          errors.push(
+            ...startValidation.errors.map(e => `advertised_start: ${e}`),
+          );
+        }
+      } else {
+        // It's already a Date object, just check if it's valid
+        if (isNaN((race['advertised_start'] as Date).getTime())) {
+          errors.push('advertised_start: Invalid Date object');
+        }
       }
     }
 

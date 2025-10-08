@@ -3,6 +3,8 @@
  * Provides structured logging with different levels and proper error handling
  */
 
+import { CONFIG } from '../config';
+
 export enum LogLevel {
   DEBUG = 0,
   INFO = 1,
@@ -24,7 +26,16 @@ class Logger {
 
   constructor() {
     this.isDevelopment = import.meta.env.DEV;
-    this.minLevel = this.isDevelopment ? LogLevel.DEBUG : LogLevel.WARN;
+    // Map string log level to enum
+    const logLevelMap: Record<string, LogLevel> = {
+      debug: LogLevel.DEBUG,
+      info: LogLevel.INFO,
+      warn: LogLevel.WARN,
+      error: LogLevel.ERROR,
+    };
+    this.minLevel = this.isDevelopment
+      ? LogLevel.DEBUG
+      : (logLevelMap[CONFIG.LOG_LEVEL] ?? LogLevel.WARN);
   }
 
   private shouldLog(level: LogLevel): boolean {
@@ -35,7 +46,7 @@ class Logger {
     level: LogLevel,
     message: string,
     context?: Record<string, unknown>,
-    error?: Error
+    error?: Error,
   ): string {
     const timestamp = new Date().toISOString();
     const levelName = LogLevel[level];
@@ -60,7 +71,7 @@ class Logger {
     level: LogLevel,
     message: string,
     context?: Record<string, unknown>,
-    error?: Error
+    error?: Error,
   ): void {
     if (!this.shouldLog(level)) {
       return;
@@ -138,7 +149,7 @@ class Logger {
   warn(
     message: string,
     context?: Record<string, unknown>,
-    error?: Error
+    error?: Error,
   ): void {
     this.log(LogLevel.WARN, message, context, error);
   }
@@ -146,7 +157,7 @@ class Logger {
   error(
     message: string,
     context?: Record<string, unknown>,
-    error?: Error
+    error?: Error,
   ): void {
     this.log(LogLevel.ERROR, message, context, error);
   }
@@ -155,7 +166,7 @@ class Logger {
   apiError(
     message: string,
     error: Error,
-    context?: Record<string, unknown>
+    context?: Record<string, unknown>,
   ): void {
     this.error(
       `API Error: ${message}`,
@@ -165,7 +176,7 @@ class Logger {
         method: (error as any).config?.method,
         status: (error as any).response?.status,
       },
-      error
+      error,
     );
   }
 
@@ -178,7 +189,7 @@ class Logger {
   performance(
     operation: string,
     duration: number,
-    context?: Record<string, unknown>
+    context?: Record<string, unknown>,
   ): void {
     this.info(`Performance: ${operation} took ${duration}ms`, context);
   }

@@ -14,7 +14,6 @@
       aria-label="Race category filters"
     >
       <button
-        @click="selectAllCategories"
         :class="[
           'w-full px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2',
           selectedCategories.size === 0
@@ -23,6 +22,7 @@
         ]"
         :aria-pressed="selectedCategories.size === 0"
         aria-label="Show all race categories"
+        @click="selectAllCategories"
       >
         All Categories
       </button>
@@ -30,7 +30,6 @@
       <button
         v-for="category in categories"
         :key="category.id"
-        @click="toggleCategory(category.id)"
         :class="[
           'w-full px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2',
           selectedCategories.has(category.id)
@@ -39,6 +38,7 @@
         ]"
         :aria-pressed="selectedCategories.has(category.id)"
         :aria-label="`Toggle ${category.name} filter`"
+        @click="toggleCategory(category.id)"
       >
         {{ category.name }}
       </button>

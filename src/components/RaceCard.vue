@@ -93,7 +93,8 @@ const props = defineProps({
         typeof race.meeting_name === 'string' &&
         typeof race.race_number === 'number' &&
         typeof race.category_id === 'string' &&
-        (race.advertised_start instanceof Date || typeof race.advertised_start === 'string')
+        (race.advertised_start instanceof Date ||
+          typeof race.advertised_start === 'string')
       );
     },
   },
@@ -133,16 +134,16 @@ const categoryColor = computed(() => {
  */
 const formatStartTime = computed(() => {
   try {
-    const startTime = props.race.advertised_start instanceof Date
-      ? props.race.advertised_start
-      : new Date(props.race.advertised_start);
+    const startTime =
+      props.race.advertised_start instanceof Date
+        ? props.race.advertised_start
+        : new Date(props.race.advertised_start);
     return startTime.toLocaleTimeString('en-AU', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true,
     });
   } catch (error) {
-    console.warn('Invalid start time format:', props.race.advertised_start);
     return 'TBD';
   }
 });

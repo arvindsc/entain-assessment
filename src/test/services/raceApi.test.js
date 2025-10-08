@@ -117,7 +117,7 @@ describe('RaceApiService', () => {
       expect(result[0].race_number).toBe(1);
       expect(result[0].meeting_name).toBe('Test Meeting');
       expect(result[0].category_id).toBe(
-        '9daef0d7-bf3c-4f50-921d-8e818c60fe61'
+        '9daef0d7-bf3c-4f50-921d-8e818c60fe61',
       );
     });
 
@@ -139,7 +139,7 @@ describe('RaceApiService', () => {
       mockClient.get.mockResolvedValue(mockResponse);
 
       await expect(raceApi.getRaces()).rejects.toThrow(
-        'Invalid API response format'
+        'Invalid API response format',
       );
     });
 

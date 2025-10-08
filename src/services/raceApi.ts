@@ -2,11 +2,18 @@ import axios, { type AxiosInstance, type AxiosError } from 'axios';
 import type { Race, RaceApiResponse, RaceSummary, ApiError } from '../types';
 import { logger } from '../utils/logger';
 import { validator } from '../utils/validator';
+import { CONFIG } from '../config';
 
 /**
  * API Base URL for Neds racing data
+ * Uses CORS proxy to handle network/DNS blocking issues
  */
-const API_BASE_URL = 'https://api.neds.com.au/rest/v1/racing';
+const getApiBaseUrl = (): string => {
+  if (CONFIG.USE_CORS_PROXY) {
+    return CONFIG.CORS_PROXY_URL + encodeURIComponent(CONFIG.API_BASE_URL);
+  }
+  return CONFIG.API_BASE_URL;
+};
 
 /**
  * Race API Service
@@ -17,7 +24,7 @@ class RaceApiService {
 
   constructor() {
     this.api = axios.create({
-      baseURL: API_BASE_URL,
+      baseURL: getApiBaseUrl(),
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
@@ -36,7 +43,9 @@ class RaceApiService {
     this.api.interceptors.request.use(
       config => {
         const startTime = performance.now();
-        (config as any).__startTime = startTime;
+        // Use proper typing for axios config with custom property
+        (config as typeof config & { __startTime: number }).__startTime =
+          startTime;
 
         logger.debug('API Request initiated', {
           method: config.method?.toUpperCase(),
@@ -49,14 +58,18 @@ class RaceApiService {
       error => {
         logger.error('Request interceptor error', {}, error);
         return Promise.reject(error);
-      }
+      },
     );
 
     // Response interceptor
     this.api.interceptors.response.use(
       response => {
+        const configWithStartTime =
+          response.config as typeof response.config & {
+            __startTime?: number;
+          };
         const duration =
-          performance.now() - (response.config as any).__startTime;
+          performance.now() - (configWithStartTime.__startTime ?? 0);
 
         logger.info('API Response received', {
           status: response.status,
@@ -73,8 +86,11 @@ class RaceApiService {
         return response;
       },
       (error: AxiosError) => {
+        const configWithStartTime = error.config as typeof error.config & {
+          __startTime?: number;
+        };
         const duration =
-          performance.now() - (error.config as any)?.__startTime || 0;
+          performance.now() - (configWithStartTime?.__startTime ?? 0);
         const apiError = this.handleApiError(error);
 
         logger.apiError('API request failed', apiError, {
@@ -84,7 +100,7 @@ class RaceApiService {
         });
 
         return Promise.reject(apiError);
-      }
+      },
     );
   }
 
@@ -186,11 +202,15 @@ class RaceApiService {
         throw new Error('Invalid timestamp: cannot parse date');
       }
 
-      // Handle future dates (beyond 2024) - adjust to current time + random hours
-      if (date.getFullYear() > 2024) {
-        const now = new Date();
+      // Handle dates far in the future (more than 1 year from now) - adjust to current time + random hours
+      const now = new Date();
+      const oneYearFromNow = new Date(
+        now.getTime() + 365 * 24 * 60 * 60 * 1000,
+      );
+
+      if (date.getTime() > oneYearFromNow.getTime()) {
         const adjustedDate = new Date(
-          now.getTime() + Math.random() * 24 * 60 * 60 * 1000
+          now.getTime() + Math.random() * 24 * 60 * 60 * 1000,
         );
 
         logger.warn('Adjusted future race date', {
@@ -208,7 +228,7 @@ class RaceApiService {
         {
           advertisedStart,
         },
-        error as Error
+        error as Error,
       );
 
       // Return current time as fallback
@@ -245,11 +265,11 @@ class RaceApiService {
       const validationResult = validator.validateApiResponse(response.data);
       if (!validationResult.isValid) {
         throw new Error(
-          `Invalid API response: ${validationResult.errors.join(', ')}`
+          `Invalid API response: ${validationResult.errors.join(', ')}`,
         );
       }
 
-      if (!data || !data.next_to_go_ids || !data.race_summaries) {
+      if (!data?.next_to_go_ids || !data.race_summaries) {
         throw new Error('Invalid API response format: missing required fields');
       }
 
@@ -270,19 +290,21 @@ class RaceApiService {
           continue;
         }
 
-        // Validate race data
-        const raceValidation = validator.validateRaceData(raceSummary);
-        if (!raceValidation.isValid) {
-          logger.warn('Invalid race data', {
-            raceId,
-            errors: raceValidation.errors,
-          });
-          errors.push(`Race ${raceId}: ${raceValidation.errors.join(', ')}`);
-          continue;
-        }
-
         try {
+          // Transform race data first (converts advertised_start to Date)
           const race = this.transformRaceData(raceSummary);
+
+          // Validate the transformed race data
+          const raceValidation = validator.validateRaceData(race);
+          if (!raceValidation.isValid) {
+            logger.warn('Invalid race data after transformation', {
+              raceId,
+              errors: raceValidation.errors,
+            });
+            errors.push(`Race ${raceId}: ${raceValidation.errors.join(', ')}`);
+            continue;
+          }
+
           races.push(race);
         } catch (transformError) {
           logger.error(
@@ -291,7 +313,7 @@ class RaceApiService {
               raceId,
               raceSummary,
             },
-            transformError as Error
+            transformError as Error,
           );
           errors.push(`Race ${raceId}: transformation failed`);
         }
@@ -326,7 +348,7 @@ class RaceApiService {
           count,
           duration: Math.round(duration),
         },
-        error as Error
+        error as Error,
       );
 
       if (error instanceof Error) {

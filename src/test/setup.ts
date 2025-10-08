@@ -44,7 +44,7 @@ Object.defineProperty(window, 'sessionStorage', {
 Object.defineProperty(global, 'crypto', {
   value: {
     randomUUID: vi.fn(
-      () => 'test-uuid-' + Math.random().toString(36).substr(2, 9)
+      () => `test-uuid-${Math.random().toString(36).substr(2, 9)}`,
     ),
   },
 });
@@ -107,7 +107,7 @@ global.AbortController = vi.fn().mockImplementation(() => ({
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   },
-})) as any;
+})) as unknown as typeof AbortController;
 
 // Mock setTimeout and setInterval for better test control
 vi.useFakeTimers();

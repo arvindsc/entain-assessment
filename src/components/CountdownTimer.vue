@@ -1,15 +1,17 @@
 <template>
   <div class="countdown-timer" role="timer" :aria-label="ariaLabel">
     <div v-if="timeLeft > 0" class="flex items-center gap-2">
-      <span class="text-xs sm:text-sm font-medium text-gray-700">Starts in:</span>
+      <span class="text-xs sm:text-sm font-medium text-gray-700">
+        Starts in:
+      </span>
       <span
         :class="[
           'text-base sm:text-lg font-bold tabular-nums transition-colors duration-300',
           timeLeft <= 60000
             ? 'text-red-600'
             : timeLeft <= 300000
-            ? 'text-orange-600'
-            : 'text-gray-900',
+              ? 'text-orange-600'
+              : 'text-gray-900',
         ]"
         :aria-live="timeLeft <= 60000 ? 'assertive' : 'polite'"
       >
@@ -17,7 +19,9 @@
       </span>
     </div>
     <div v-else class="flex items-center gap-2">
-      <span class="text-xs sm:text-sm font-medium text-gray-700">Race Status:</span>
+      <span class="text-xs sm:text-sm font-medium text-gray-700">
+        Race Status:
+      </span>
       <span
         class="text-base sm:text-lg font-bold text-red-600"
         aria-live="assertive"
@@ -29,7 +33,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 
 /**
  * Props for CountdownTimer component
@@ -41,14 +45,16 @@ const props = defineProps({
   startTime: {
     type: [String, Date],
     required: true,
-    validator: (value) => {
-      if (value instanceof Date) return true;
+    validator: value => {
+      if (value instanceof Date) {
+        return true;
+      }
       return !isNaN(Date.parse(value));
     },
   },
   ariaLabel: {
     type: String,
-    default: "Race countdown timer",
+    default: 'Race countdown timer',
   },
 });
 
@@ -63,10 +69,14 @@ const intervalId = ref(null);
  * @returns {string} Formatted time string - always shows seconds for consistency
  */
 const formattedTime = computed(() => {
-  if (timeLeft.value <= 0) return "0s";
+  if (timeLeft.value <= 0) {
+    return '0s';
+  }
 
   const days = Math.floor(timeLeft.value / (24 * 60 * 60 * 1000));
-  const hours = Math.floor((timeLeft.value % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+  const hours = Math.floor(
+    (timeLeft.value % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000),
+  );
   const minutes = Math.floor((timeLeft.value % (60 * 60 * 1000)) / (60 * 1000));
   const seconds = Math.floor((timeLeft.value % (60 * 1000)) / 1000);
 
@@ -90,9 +100,10 @@ const formattedTime = computed(() => {
  */
 const updateCountdown = () => {
   const now = new Date().getTime();
-  const startTime = props.startTime instanceof Date
-    ? props.startTime.getTime()
-    : new Date(props.startTime).getTime();
+  const startTime =
+    props.startTime instanceof Date
+      ? props.startTime.getTime()
+      : new Date(props.startTime).getTime();
   timeLeft.value = Math.max(0, startTime - now);
 
   // Clear interval when countdown reaches zero
@@ -138,15 +149,17 @@ onUnmounted(() => {
 watch(
   () => props.startTime,
   (newTime, oldTime) => {
-    const newTimestamp = newTime instanceof Date ? newTime.getTime() : new Date(newTime).getTime();
-    const oldTimestamp = oldTime instanceof Date ? oldTime.getTime() : new Date(oldTime).getTime();
+    const newTimestamp =
+      newTime instanceof Date ? newTime.getTime() : new Date(newTime).getTime();
+    const oldTimestamp =
+      oldTime instanceof Date ? oldTime.getTime() : new Date(oldTime).getTime();
 
     // Only restart if timestamp actually changed
     if (newTimestamp !== oldTimestamp) {
       stopTimer();
       startTimer();
     }
-  }
+  },
 );
 </script>
 
