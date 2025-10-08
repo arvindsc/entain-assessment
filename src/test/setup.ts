@@ -1,8 +1,4 @@
 import { vi, afterEach } from 'vitest';
-import { setupTestEnvironment } from './utils';
-
-// Setup comprehensive test environment
-setupTestEnvironment();
 
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {

@@ -1,9 +1,9 @@
 <template>
-  <div v-if="hasError" class="error-boundary">
-    <div class="error-content">
-      <div class="error-icon">
+  <div v-if="hasError" class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+      <div class="mb-6">
         <svg
-          class="w-16 h-16 text-red-500"
+          class="w-16 h-16 text-red-500 mx-auto"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -18,53 +18,53 @@
         </svg>
       </div>
 
-      <h2 class="error-title">Something went wrong</h2>
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">Something went wrong</h2>
 
-      <p class="error-message">
+      <p class="text-gray-600 mb-8 leading-relaxed">
         We're sorry, but something unexpected happened. Our team has been
         notified and is working to fix the issue.
       </p>
 
-      <div class="error-actions">
+      <div class="flex flex-col sm:flex-row gap-4 justify-center mb-6">
         <button
           @click="handleRetry"
-          class="retry-button"
+          class="px-6 py-3 rounded-lg font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center"
           :disabled="isRetrying"
         >
           <span
             v-if="isRetrying"
-            class="loading-spinner"
+            class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"
             aria-hidden="true"
           ></span>
           {{ isRetrying ? 'Retrying...' : 'Try Again' }}
         </button>
 
-        <button @click="handleReload" class="reload-button">Reload Page</button>
+        <button @click="handleReload" class="px-6 py-3 rounded-lg font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500">Reload Page</button>
       </div>
 
-      <details v-if="showDetails" class="error-details">
-        <summary class="error-details-summary">Technical Details</summary>
-        <div class="error-details-content">
-          <p>
+      <details v-if="showDetails" class="text-left mb-4">
+        <summary class="cursor-pointer text-sm text-gray-600 hover:text-gray-800 font-medium">Technical Details</summary>
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg text-sm">
+          <p class="mb-2">
             <strong>Error:</strong>
             {{ error?.message || 'Unknown error' }}
           </p>
-          <p>
+          <p class="mb-2">
             <strong>Component:</strong>
             {{ errorInfo?.componentName || 'Unknown' }}
           </p>
-          <p>
+          <p class="mb-2">
             <strong>Time:</strong>
             {{ errorTime }}
           </p>
-          <details v-if="error?.stack" class="stack-trace">
-            <summary>Stack Trace</summary>
-            <pre class="stack-trace-content">{{ error.stack }}</pre>
+          <details v-if="error?.stack" class="mt-4">
+            <summary class="cursor-pointer text-sm text-gray-600 hover:text-gray-800 font-medium">Stack Trace</summary>
+            <pre class="text-xs text-gray-500 bg-gray-100 p-2 rounded overflow-x-auto mt-2">{{ error.stack }}</pre>
           </details>
         </div>
       </details>
 
-      <button @click="toggleDetails" class="toggle-details-button">
+      <button @click="toggleDetails" class="text-sm text-gray-500 hover:text-gray-700 underline">
         {{ showDetails ? 'Hide' : 'Show' }} Technical Details
       </button>
     </div>
@@ -196,82 +196,3 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
-.error-boundary {
-  @apply min-h-screen flex items-center justify-center bg-gray-50 px-4;
-}
-
-.error-content {
-  @apply max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center;
-}
-
-.error-icon {
-  @apply mb-6;
-}
-
-.error-title {
-  @apply text-2xl font-bold text-gray-900 mb-4;
-}
-
-.error-message {
-  @apply text-gray-600 mb-8 leading-relaxed;
-}
-
-.error-actions {
-  @apply flex flex-col sm:flex-row gap-4 justify-center mb-6;
-}
-
-.retry-button,
-.reload-button {
-  @apply px-6 py-3 rounded-lg font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
-}
-
-.retry-button {
-  @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed;
-}
-
-.reload-button {
-  @apply bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500;
-}
-
-.loading-spinner {
-  @apply inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2;
-}
-
-.error-details {
-  @apply text-left mb-4;
-}
-
-.error-details-summary {
-  @apply cursor-pointer text-sm text-gray-600 hover:text-gray-800 font-medium;
-}
-
-.error-details-content {
-  @apply mt-4 p-4 bg-gray-50 rounded-lg text-sm;
-}
-
-.error-details-content p {
-  @apply mb-2;
-}
-
-.stack-trace {
-  @apply mt-4;
-}
-
-.stack-trace-content {
-  @apply text-xs text-gray-500 bg-gray-100 p-2 rounded overflow-x-auto;
-}
-
-.toggle-details-button {
-  @apply text-sm text-gray-500 hover:text-gray-700 underline;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-</style>
